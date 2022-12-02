@@ -1,0 +1,1 @@
+CREATE SCHEMA airflow; -- Create schema specified in .airflow_env

@@ -1,0 +1,48 @@
+version: "2"
+
+services:
+  postgresql:
+    container_name: airflow_db
+    image: bitnami/postgresql:14.6.0-debian-11-r7
+    env_file:
+      - ./env_files/.postgres_env
+    volumes:
+      - './postgres_data:/var/lib/posgresql/data'
+    ports:
+      - "5432:5432"
+  airflow_init:
+    container_name: airflow_init
+    image: custom/airflow
+    env_file:
+      - ./env_files/.airflow_env
+    entrypoint: airflow db init
+    depends_on:
+      - postgresql
+  airflow:
+    container_name: airflow
+    image: custom/airflow
+    build: .
+    env_file:
+      - ./env_files/.airflow_env
+    entrypoint: airflow webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgresql
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./plugins:/opt/airflow/plugins
+      - ./logs:/opt/airflow/logs
+  airflow_scheduler:
+    container_name: airflow_scheduler
+    image: custom/airflow
+    build: .
+    env_file:
+      - ./env_files/.airflow_env
+    entrypoint: airflow scheduler
+    depends_on:
+      - postgresql
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./plugins:/opt/airflow/plugins
+      - ./logs:/opt/airflow/logs
