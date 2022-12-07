@@ -39,7 +39,7 @@ services:
     build: .
     env_file:
       - ./env_files/.airflow_env
-    entrypoint: airflow scheduler
+    entrypoint: bash -c "python ./plugins/include/generate_dags.py && airflow scheduler"
     depends_on:
       - postgresql
     volumes:

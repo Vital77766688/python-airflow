@@ -1,0 +1,33 @@
+[
+    {
+        "dag_template": "stage_dag_template.jinja2",
+        "dag_id": "stage_dag",
+        "retries": 1,
+        "retry_delay": "timedelta(minutes=1)",
+        "description": "This dags loads stage area",
+        "schedule": "0 8 * * *",
+        "start_date": "datetime(2022, 11, 28)",
+        "catchup": false,
+        "tags": ["stage_dag", "stage"],
+        "tasks": [
+            {
+                "task_id": "test_task",
+                "task_path": "tasks.test_task.test_task"
+            },
+            {
+                "task_id": "test_task1",
+                "task_path": "tasks.test_task.test_task",
+                "depends_on": ["test_task"]
+            },
+            {
+                "task_id": "test_task2",
+                "task_path": "tasks.test_task.test_task",
+                "depends_on": ["test_task1"]
+            },
+            {
+                "task_id": "test_task3",
+                "task_path": "tasks.test_task.test_task"
+            }
+        ]
+    }
+]

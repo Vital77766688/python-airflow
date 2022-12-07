@@ -7,5 +7,3 @@ COPY airflow.cfg .
 
 RUN pip install --upgrade pip
 RUN pip install -r /opt/airflow/requirements.txt
-
-CMD ['bash -c', 'echo ${AIRFLOW_DATABASE_USER}']

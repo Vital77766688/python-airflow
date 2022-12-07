@@ -1,0 +1,38 @@
+from datetime import datetime, timedelta
+from airflow import DAG
+from airflow.operators.dummy import DummyOperator
+
+from utils.import_tasks import import_task
+
+
+dag = DAG(
+    dag_id='{{ dag_conf.dag_id }}',
+    default_args={
+        'retries': {{ dag_conf.retries }},
+        'retry_delay': {{ dag_conf.retry_delay }},
+    },
+    description='{{ dag_conf.description }}',
+    schedule='{{ dag_conf.schedule }}',
+    start_date={{ dag_conf.start_date }},
+    catchup={{ dag_conf.catchup or False}},
+    tags={{ dag_conf.tags }},
+)
+
+
+with dag:
+    start_task = DummyOperator(task_id='start_task')
+    end_task = DummyOperator(task_id='end_task')
+
+
+    {% if dag_conf.tasks %}
+    # list tasks for the dag
+    {% for task in dag_conf.tasks %}
+    {{ task.task_id }} = import_task('{{ task.task_path }}')(task_id='{{ task.task_id }}')
+    {% endfor %}
+    # list all dependencies
+    {% for dependency in dependencies %}
+    {{ dependency.depends_on|join or 'start_task' }} >> {{ dependency.task_id }} >> {{ dependency.depends_by|join or 'end_task' }}
+    {% endfor %}
+    {% else %}
+    start_task >> end_task
+    {% endif %}

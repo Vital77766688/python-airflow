@@ -51,3 +51,41 @@ docker exec -it airflow airflow users create --username admin --firstname admin 
 ```
 
 ### Open localhost:8080 and login with specified username and password
+
+# Dynamic DAGs usage
+
+All dags will be generated on the start of airflow_scheduler container.
+
+For manual dag generation use command in terminal:
+```
+docker exec -it airflow python ./plugins/include/generate_dags.py
+```
+
+## DAGs confing
+Dags are generated from json config file (./plugins/include/dag_conf)
+
+### DAG config structure
+dag_template - specifies the path to jinja2 template for dag, dag_id, retries, retry_delay, description, schedule, start_date, catchup, tags - list and tasks.
+
+### Task config structure
+tasks list contains dictioanries with task_id, task_path - path to file with task, depends_on (optional) - list of dependecies.
+
+### Task function structure
+Task function must return operator class and it will be dynamically imported in the dag.
+
+Example of task code:
+```
+from airflow.operators.python import PythonOperator
+
+
+def log_info():
+    print('test')
+
+
+def test_task(task_id):
+    test_task = PythonOperator(
+        task_id=task_id,
+        python_callable=log_info
+    )    
+    return test_task
+```
